@@ -1,0 +1,23 @@
+import pyautogui
+import pyperclip
+import time
+import sys
+
+TYPING_DELAY = 0.02  
+STARTUP_DELAY = 5    
+
+print(f"[-] Copied {len(pyperclip.paste())} characters from clipboard.")
+print(f"[-] You have {STARTUP_DELAY} seconds to click inside the VM console...")
+
+for i in range(STARTUP_DELAY, 0, -1):
+    print(f"{i}...", end=' ', flush=True)
+    time.sleep(1)
+print("\n[+] Typing started!")
+
+text_to_type = pyperclip.paste()
+
+try:
+    pyautogui.write(text_to_type, interval=TYPING_DELAY)
+    print("\n[+] Done!")
+except KeyboardInterrupt:
+    print("\n[!] Stopped by user.")

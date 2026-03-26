@@ -1,0 +1,30 @@
+#information on configuring web server with https
+
+sudo apt install resolvconf -y	#install resolvconf which tells which DNS servers to query
+sudo vi /etc/resolv.conf
+
+#specificy the nameservers of the external dns
+nameserver 8.8.8.8
+
+
+sudo apt update && sudo apt install certbot python3-certbot-apache -y
+sudo certbot certonly --webroot -w /var/www/html -d teamX.com --server http://[CA_IP]/acme/directory
+
+#certs will be stored here /etc/letsencrypt/live/teamX.com/
+
+
+
+#update the conf file with this under the VirtualHost *:443 at sudo nano /etc/apache2/sites-available/default-ssl.conf
+
+#SSL Configuration 
+SSLEngine on SSLCertificateFile /etc/letsencrypt/live/teamX.com/fullchain.pem SSLCertificateKeyFile /etc/letsencrypt/live/teamX.com/privkey.pem
+
+
+# to check if it worked
+openssl x509 -in /etc/letsencrypt/live/yourdomain.com/cert.pem -noout -issuer
+
+#to test connectivity to the CA
+curl https://CA_IP:8443/acme/directory
+
+#to test DNS resolution
+nslookup yourdomain.competition.net

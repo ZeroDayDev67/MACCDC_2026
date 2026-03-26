@@ -1,0 +1,15 @@
+#network configuration on ubuntu
+
+UPDATE THE /etc/netplan/<FILENAME> with this information:
+   network:
+      version: 2
+      renderer: networkd
+      ethernets:
+        enp0s3: # Your interface name
+          dhcp4: false
+          addresses: [192.168.11.5/24] # IP Address/CIDR notation
+          gateway4: 192.168.1.1 # Your router's IP
+          nameservers:
+            addresses: [8.8.8.8, 1.1.1.1] # DNS servers
+
+#sudo netplan apply

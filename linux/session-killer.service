@@ -1,0 +1,13 @@
+[Unit]
+Description=Kill unauthorized sessions
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/session-killer.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

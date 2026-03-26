@@ -1,0 +1,40 @@
+#https setup
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    server_name _;
+    
+    # Point to dummy certs so it doesn't crash on HTTPS requests
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+    # 444 is a special Nginx code that means "Close the connection immediately with no response"
+    return 444; 
+}
+
+
+#for https part 
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name maccdcprep.com www.maccdcprep.com;
+
+    root /var/www/maccdcprep.com/html;
+    index index.html index.htm;
+
+    # Point to the self-signed certificate files we just created
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+# Only allow GEmacT, HEAD, and POST methods. Drop everything else.
+if ($request_method !~ ^(GET|HEAD|POST)$ ) {
+    return 405;
+}
+}

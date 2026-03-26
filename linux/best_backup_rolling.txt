@@ -1,0 +1,44 @@
+
+
+#best backup idea with hiding backup
+
+
+udo mkdir /var/cache/man/.sys_cache
+sudo chown root:root /var/cache/man/.sys_cache
+sudo chmod 700 /var/cache/man/.sys_cache
+
+
+sudo nano /usr/libexec/.dbus-update-metrics
+
+#!/bin/bash
+
+TIMESTAMP=$(date +%s)
+VAULT_DIR="/var/cache/man/.sys_cache"
+BACKUP_FILE=".mandb_update_$TIMESTAMP.dat"
+HASH_DIR="/var/crash"
+HASH_FILE=".kdump_$TIMESTAMP.sig"
+
+# 1. Take the backup silently
+tar --zstd -cf "$VAULT_DIR/$BACKUP_FILE" --exclude=/var/cache/man/.sys_cache /home /etc /root /usr/ /opt /srv /var 2>/dev/null
+
+# 2. Generate the hash
+sha256sum "$VAULT_DIR/$BACKUP_FILE" | awk '{print $1}' > "$HASH_DIR/$HASH_FILE"
+
+# 3. RETENTION POLICY: Delete backups and hashes older than 240 minutes (4 hours)
+find "$VAULT_DIR" -type f -name ".mandb_update_*.dat" -mmin +120 -exec rm {} \; 2>/dev/null
+find "$HASH_DIR" -type f -name ".kdump_*.sig" -mmin +120 -exec rm {} \; 2>/dev/null
+
+#if want to backup mysql put this line in
+mysqldump -u root -p'YOUR_ROOT_PASSWORD' --all-databases > "$VAULT_DIR/.mandb_update_db_$TIMESTAMP.dat"
+
+
+
+#END OF BASH FILE
+
+#to make the script executable
+sudo chmod +x /usr/libexec/.dbus-update-metrics
+
+#create the cron file in a hidden place so that they will not see it running crontab -l
+sudo nano /etc/cron.d/dbus-sync
+
+*/30 * * * * root /usr/libexec/.dbus-update-metrics
